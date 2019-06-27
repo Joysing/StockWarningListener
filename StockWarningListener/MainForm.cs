@@ -176,6 +176,7 @@ namespace StockWarningListener
             }
             Clipboard.SetText("测试消息");
             SendMessageByClipboard();
+            CallQQPhone();
         }
 
         private void Button_Start_Click(object sender, EventArgs e)
@@ -248,7 +249,7 @@ namespace StockWarningListener
                     Clipboard.SetFileDropList(strcoll);
                     SendMessageByClipboard();
                 }
-                CallQQPhone();
+               // CallQQPhone();
             }
             
         }
@@ -353,23 +354,28 @@ namespace StockWarningListener
         }
         private void CallQQPhone()
         {
-            
             SetForegroundWindow(QQWindowHandle); //把窗体置于最前
             RECT WindowFx = new RECT();
             GetWindowRect(QQWindowHandle, ref WindowFx);//h为窗口句柄
             int ScreenWidth = Screen.PrimaryScreen.Bounds.Width;//电脑屏幕宽度
             int ScreenHeight = Screen.PrimaryScreen.Bounds.Height;//电脑屏幕高度
 
+            //挂掉上一次的电话
+            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (WindowFx.Right - 20) * 65535 / ScreenWidth, (WindowFx.Top + 283) * 65535 / ScreenHeight, 0, 0);
+            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN, (WindowFx.Right - 20) * 65535 / ScreenWidth, (WindowFx.Top + 283) * 65535 / ScreenHeight, 0, 0);
+            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTUP, (WindowFx.Right - 20) * 65535 / ScreenWidth, (WindowFx.Top + 283) * 65535 / ScreenHeight, 0, 0);
+
+            Thread.Sleep(1000);
             //通过坐标点击电话按钮
-            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (WindowFx.Right - 120) * 65535 / ScreenWidth, (WindowFx.Top + 66) * 65535 / ScreenHeight, 0, 0);
-            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN, (WindowFx.Right - 120) * 65535 / ScreenWidth, (WindowFx.Top + 66) * 65535 / ScreenHeight, 0, 0);
-            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTUP, (WindowFx.Right - 120) * 65535 / ScreenWidth, (WindowFx.Top + 66) * 65535 / ScreenHeight, 0, 0);
+            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (WindowFx.Right - 128) * 65535 / ScreenWidth, (WindowFx.Top + 68) * 65535 / ScreenHeight, 0, 0);
+            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN, (WindowFx.Right - 128) * 65535 / ScreenWidth, (WindowFx.Top + 68) * 65535 / ScreenHeight, 0, 0);
+            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTUP, (WindowFx.Right - 128) * 65535 / ScreenWidth, (WindowFx.Top + 68) * 65535 / ScreenHeight, 0, 0);
 
             Thread.Sleep(1000);
             //通过坐标点击【QQ电话】
-            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (WindowFx.Right - 120) * 65535 / ScreenWidth, (WindowFx.Top + 106) * 65535 / ScreenHeight, 0, 0);
-            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN, (WindowFx.Right - 120) * 65535 / ScreenWidth, (WindowFx.Top + 106) * 65535 / ScreenHeight, 0, 0);
-            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTUP, (WindowFx.Right - 120) * 65535 / ScreenWidth, (WindowFx.Top + 106) * 65535 / ScreenHeight, 0, 0);
+            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (WindowFx.Right - 128) * 65535 / ScreenWidth, (WindowFx.Top + 106) * 65535 / ScreenHeight, 0, 0);
+            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN, (WindowFx.Right - 128) * 65535 / ScreenWidth, (WindowFx.Top + 106) * 65535 / ScreenHeight, 0, 0);
+            mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTUP, (WindowFx.Right - 128) * 65535 / ScreenWidth, (WindowFx.Top + 106) * 65535 / ScreenHeight, 0, 0);
         }
     }
 }
