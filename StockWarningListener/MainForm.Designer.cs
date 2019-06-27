@@ -38,6 +38,7 @@
             this.textBox_FilePath = new System.Windows.Forms.TextBox();
             this.button_selectFilePath = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
+            this.checkBox_CallPhone = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // button_TestSendMsg
@@ -137,11 +138,24 @@
             this.label3.TabIndex = 9;
             this.label3.Text = "监控文件";
             // 
+            // checkBox_CallPhone
+            // 
+            this.checkBox_CallPhone.AutoSize = true;
+            this.checkBox_CallPhone.Checked = true;
+            this.checkBox_CallPhone.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_CallPhone.Location = new System.Drawing.Point(261, 104);
+            this.checkBox_CallPhone.Name = "checkBox_CallPhone";
+            this.checkBox_CallPhone.Size = new System.Drawing.Size(135, 19);
+            this.checkBox_CallPhone.TabIndex = 10;
+            this.checkBox_CallPhone.Text = "同时拨打QQ电话";
+            this.checkBox_CallPhone.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(501, 318);
+            this.Controls.Add(this.checkBox_CallPhone);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.button_selectFilePath);
             this.Controls.Add(this.textBox_FilePath);
@@ -172,6 +186,7 @@
         private System.Windows.Forms.TextBox textBox_FilePath;
         private System.Windows.Forms.Button button_selectFilePath;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.CheckBox checkBox_CallPhone;
     }
 }
 

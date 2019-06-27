@@ -176,7 +176,11 @@ namespace StockWarningListener
             }
             Clipboard.SetText("测试消息");
             SendMessageByClipboard();
-            CallQQPhone();
+            if (checkBox_CallPhone.Checked)
+            {
+                CallQQPhone();
+            }
+            
         }
 
         private void Button_Start_Click(object sender, EventArgs e)
@@ -249,7 +253,10 @@ namespace StockWarningListener
                     Clipboard.SetFileDropList(strcoll);
                     SendMessageByClipboard();
                 }
-               // CallQQPhone();
+                if (checkBox_CallPhone.Checked)
+                {
+                    CallQQPhone();
+                }
             }
             
         }
