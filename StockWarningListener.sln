@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockWarningListener", "StockWarningListener\StockWarningListener.csproj", "{CAC91EF2-3A83-4436-932D-03C2A2CC5FC5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CAC91EF2-3A83-4436-932D-03C2A2CC5FC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAC91EF2-3A83-4436-932D-03C2A2CC5FC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAC91EF2-3A83-4436-932D-03C2A2CC5FC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAC91EF2-3A83-4436-932D-03C2A2CC5FC5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {87205CBA-450E-402B-967B-68F1DB3DDCD2}
+	EndGlobalSection
+EndGlobal
