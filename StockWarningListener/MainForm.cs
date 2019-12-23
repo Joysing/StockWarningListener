@@ -44,7 +44,7 @@ namespace StockWarningListener
         {
             GetAllDesktopWindows();
             string en_US = "00000409"; //英文
-            string cn_ZH = "00000804";
+            //string cn_ZH = "00000804";
             uint KLF_ACTIVATE = 1;
             PostMessage(0xffff, 0x00500, IntPtr.Zero, LoadKeyboardLayout(en_US, KLF_ACTIVATE));//屏蔽中文输入法
 
@@ -55,151 +55,14 @@ namespace StockWarningListener
             //    thread1.Start();
             //};
             //timer.AutoReset = true; //每到指定时间Elapsed事件是触发一次（false），还是一直触发（true）
-            Buy("600356",0,100);
-            //Console.WriteLine(GetBalance());
+            //YH_Client.Buy("600356",0,100);
+            //Console.WriteLine(YH_Client.GetBalance());
+            DZH_Warning.GetWarningData();
         }
 
-        /// <summary>
-        /// 获取资金状况
-        /// </summary>
-        private StringBuilder GetBalance()
-        {
-            IntPtr YHWindowHandle = FindWindow(null, "网上股票交易系统5.0");
-            IntPtr Handle32770a = FindWindowEx(YHWindowHandle, 0, "#32770", null);
-            IntPtr Handle32770b = FindWindowEx(YHWindowHandle, (int)Handle32770a, "#32770", null);
-            IntPtr HandleAvailableFunds = GetChildrenWindowHandle(Handle32770b, "Static",null,3);
-            IntPtr HandleMarketValue = GetChildrenWindowHandle(Handle32770b, "Static",null,7);
-            IntPtr HandleAssets = GetChildrenWindowHandle(Handle32770b, "Static",null,9);
-
-            StringBuilder sb = new StringBuilder();
-            StringBuilder sbTemp = new StringBuilder();
-            SendMessage(HandleAvailableFunds, WindowsMessage.WM_GETTEXT, 128, sbTemp);
-            sb.Append("可用资金：").Append(sbTemp.ToString());
-            SendMessage(HandleMarketValue, WindowsMessage.WM_GETTEXT, 128, sbTemp);
-            sb.Append("，市值：").Append(sbTemp.ToString());
-            SendMessage(HandleAssets, WindowsMessage.WM_GETTEXT, 128, sbTemp);
-            sb.Append("，总资产：").Append(sbTemp.ToString());
-            return sb;
-        }
-
-        /// <summary>
-        /// 获取第几个子控件
-        /// </summary>
-        /// <param name="ParentHandle">父窗口句柄</param>
-        /// <param name="ClassName">控件类名</param>
-        /// <param name="Title">控件标题</param>
-        /// <param name="which">第几个</param>
-        /// <returns></returns>
-        private IntPtr GetChildrenWindowHandle(IntPtr ParentHandle,string ClassName,string Title,int which)
-        {
-            IntPtr ChildrenWindowHandle = FindWindowEx(ParentHandle, 0, ClassName, Title);
-            if (which==1)
-            {
-                return ChildrenWindowHandle;
-            }
-            else if(which > 1)
-            {
-                for (int i = 1; i < which; i++)
-                {
-                    ChildrenWindowHandle = FindWindowEx(ParentHandle, (int)ChildrenWindowHandle, ClassName, Title);
-                }
-            }
-            return ChildrenWindowHandle;
-        }
-        /// <summary>
-        /// 买入
-        /// </summary>
-        /// <param name="StockCode">股票代码</param>
-        /// <param name="Price">价格，输入0则以最新价买入</param>
-        /// <param name="QTY">数量</param>
-        private void Buy(string StockCode,double Price,int QTY)
-        {
-            IntPtr YHWindowHandle = FindWindow(null, "网上股票交易系统5.0");
-            IntPtr AfxMDIFrame42sWindowHandle = FindWindowEx(YHWindowHandle, 0, "AfxMDIFrame42s", null);
-            IntPtr Handle32770 = GetChildrenWindowHandle(AfxMDIFrame42sWindowHandle, "#32770", null, 4);
-            IntPtr HandleStockCodeEdit = FindWindowEx(Handle32770, 0, "Edit", null);//证券代码编辑框
-            IntPtr HandlePriceEdit = FindWindowEx(Handle32770, (int)HandleStockCodeEdit, "Edit", null);//买入价格编辑框
-            IntPtr HandleQTYEdit = FindWindowEx(Handle32770, (int)HandlePriceEdit, "Edit", null);//买入数量编辑框
-            IntPtr HandleBuyButton = FindWindowEx(Handle32770, 0, "Button", "买入[B]");//买入按钮
-            IntPtr HandleStockName = FindWindowEx(Handle32770, 0, "Static", null);//股票名称
-            IntPtr HandlePriceList = FindWindowEx(Handle32770, 0, "#32770", null);//买5卖5
-            IntPtr HandlePriceSell5 = FindWindowEx(HandlePriceList, 0, "Static", null);//卖5
-            IntPtr HandlePriceSell4 = FindWindowEx(HandlePriceList, (int)HandlePriceSell5, "Static", null);//卖4
-            IntPtr HandlePriceSell3 = FindWindowEx(HandlePriceList, (int)HandlePriceSell4, "Static", null);//卖3
-            IntPtr HandlePriceSell2 = FindWindowEx(HandlePriceList, (int)HandlePriceSell3, "Static", null);//卖2
-            IntPtr HandlePriceSell1 = FindWindowEx(HandlePriceList, (int)HandlePriceSell2, "Static", null);//卖1
-            IntPtr HandlePriceNew = FindWindowEx(HandlePriceList, (int)HandlePriceSell1, "Static", null);//最新价
-
-            if (YHWindowHandle.ToString() != "0")
-            {
-                SetForegroundWindow(YHWindowHandle); //把窗体置于最前
-                SendKeys.SendWait("{F1}"); //模拟键盘输入F1买入界面
-                                           //SendKeys.Send("{F2}"); //模拟键盘输入F2卖出界面
-
-                Clipboard.SetText(StockCode);
-                SendMessage(HandleStockCodeEdit, WindowsMessage.WM_PASTE, 0, "");
-                while (true)
-                {
-                    StringBuilder sbStockName = new StringBuilder();
-                    SendMessage(HandleStockName, WindowsMessage.WM_GETTEXT, 128, sbStockName);//读取股票名称
-                    if (sbStockName.Length > 0)
-                    {
-                        break;
-                    }
-                }
-                if (Price > 0)
-                {
-                    Clipboard.SetText(Convert.ToString(Price));
-                    SendMessage(HandlePriceEdit, WindowsMessage.WM_PASTE, 0, "");
-                }
-                else
-                {
-                    SendMessage(HandlePriceNew, WindowsMessage.WM_LBUTTONDOWN, 0, "");
-                    SendMessage(HandlePriceNew, WindowsMessage.WM_LBUTTONUP, 0, "");
-                }
-                
-                Clipboard.SetText(Convert.ToString(QTY));
-                SendMessage(HandleQTYEdit, WindowsMessage.WM_PASTE, 0, "");
-                SendMessage(HandleQTYEdit, WindowsMessage.WM_PASTE, 0, "");
-
-                //SendMessage(HandleBuyButton, BM_CLICK, 1, "0");
-                //SendMessage(HandleQTYEdit, WindowsMessage.WM_KEYDOWN, WindowsKeyCode.VK_CONTROL, "");
-                //SendMessage(HandleQTYEdit, WindowsMessage.WM_CHAR, WindowsKeyCode.VK_B, "");
-                //SendMessage(HandleQTYEdit, WindowsMessage.WM_KEYUP, WindowsKeyCode.VK_CONTROL, "");
-                SendKeys.SendWait("^b");
-
-                SendKeys.SendWait("{ENTER}"); //确认下单
 
 
-                while (true)
-                {
-                    IntPtr WindowHandleTipForm = FindWindowEx(IntPtr.Zero, 0, "#32770", null);
-                    IntPtr WindowHandleTipFormContent = FindWindowEx(WindowHandleTipForm, 0, "Static", null);
-                    IntPtr WindowHandleTipFormTitle = FindWindowEx(WindowHandleTipForm, (int)WindowHandleTipFormContent, "Static", null);
-                    StringBuilder TipTitle = new StringBuilder();
-                    SendMessage(WindowHandleTipFormTitle, WindowsMessage.WM_GETTEXT, 10, TipTitle);
-                    if (WindowHandleTipFormTitle.ToInt32() > 0 && "提示".Equals(TipTitle.ToString()))
-                    {
-                        StringBuilder TipContent = new StringBuilder();
-                        SendMessage(WindowHandleTipFormContent, WindowsMessage.WM_GETTEXT, 1024, TipContent);
-                        Console.WriteLine(TipContent);
-                        SetForegroundWindow(WindowHandleTipForm); //把窗体置于最前
-                        SendKeys.SendWait("{ENTER}");
-                        break;
-                    }
-                    else if (WindowHandleTipFormTitle.ToInt32() == 0)
-                    {
-                        break;
-                    }
-                }
-                //SendKeys.SendWait("{ENTER}");//Enter
-                //SendKeys.Send("^{ENTER}");//Ctrl+Enter
-            }
-            else
-            {
-                MessageBox.Show("木有找到股票交易窗口");
-            }
-        }
+
 
         [DllImport("user32.dll")]
         private static extern IntPtr LoadKeyboardLayout(string pwszKLID, uint Flags);
@@ -211,47 +74,16 @@ namespace StockWarningListener
         /// <returns>窗口句柄</returns>
         [DllImport("user32.dll", EntryPoint = "FindWindow")]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-        /// <summary>
-        /// 找到窗口
-        /// </summary>
-        /// <param name="hwndParent">父窗口句柄（如果为空，则为桌面窗口）</param>
-        /// <param name="hwndChildAfter">子窗口句柄（从该子窗口之后查找）</param>
-        /// <param name="lpszClass">窗口类名(例：Button</param>
-        /// <param name="lpszWindow">窗口标题</param>
-        /// <returns></returns>
-        [DllImport("user32.dll", EntryPoint = "FindWindowEx")]
-        private extern static IntPtr FindWindowEx(IntPtr hwndParent, int hwndChildAfter, string lpszClass, string lpszWindow);
+   
         //把窗体置于最前
         [DllImport("user32.dll")]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
-        /// <summary>
-        /// 发送消息
-        /// </summary>
-        /// <param name="hwnd">消息接受窗口句柄</param>
-        /// <param name="wMsg">消息</param>
-        /// <param name="wParam">指定附加的消息特定信息</param>
-        /// <param name="lParam">指定附加的消息特定信息</param>
-        /// <returns></returns>
-        [DllImport("user32.dll", EntryPoint = "SendMessageA")]
-        public static extern bool SendMessage(IntPtr hwnd, int wMsg, int wParam, string lParam);
-        [DllImport("user32.dll", EntryPoint = "SendMessageA")]
-        public static extern bool SendMessage(IntPtr hwnd, int wMsg, int wParam, StringBuilder lParam);
+
         [DllImport("user32.dll")]
         private static extern bool PostMessage(int hhwnd, uint msg, IntPtr wparam, IntPtr lparam);
         [DllImport("user32")]
         public static extern int mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
 
-        [DllImport("user32")]
-        public static extern int EnumWindows(CallBack x, int y);
-        public delegate bool CallBack(int hwnd, int lParam);
-
-        public static bool Report(int hwnd, int lParam)
-        {
-            Console.Write("Window handle is :");
-            Console.WriteLine(hwnd);
-            Console.Read();
-            return true;
-        }
         /// <summary>
         /// 获取预警数据
         /// </summary>
