@@ -12,6 +12,14 @@
 
 using namespace std;
 
+
+//大智慧调用：
+//
+//条件: OPEN > 200;
+//IF 条件 THEN
+//BEGIN
+//write2txt : = "DZHWarningExport@WRITETOTXT"(DYNAINFO(7), DYNAINFO(14) * 条件, vol * 条件);{除了第一个参数，必须 *条件}
+//END;
 string folderPath = "WarningTxt";
 LPCWSTR stringToLPCWSTR(std::string orig)
 {
@@ -24,6 +32,24 @@ LPCWSTR stringToLPCWSTR(std::string orig)
     return wcstring;
 }
 
+//四舍五入
+double doubleRound(double number, int bits) //number->浮点数，bits->保留位数
+{
+    for (int i = 0;i < bits;++i)
+    {
+        number *= 10;
+    }
+    if (number > 0)
+        number = (long long)(number + 0.5);
+    else if (number < 0)
+        number = (long long)(number - 0.5);
+
+    for (int i = 0;i < bits;++i)
+    {
+        number /= 10;
+    }
+    return number;
+}
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
@@ -44,20 +70,6 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     }
     
     return TRUE;
-}
-void CreatTxt(char* pathName, char* rBuffer, int length)//创建txt文件
-{
-    //char* path = "C:\\1.txt"; // 你要创建文件的路径
-    ofstream fout(pathName);
-    if (fout) { // 如果创建成功
-        for (int i = 0; i < length; i++)
-        {
-            fout << "写入的内容" << endl; // 使用与cout同样的方式进行写入
-
-        }
-
-        fout.close();  // 执行完操作后关闭文件句柄
-    }
 }
 
 //计算收盘价的均价,一个常数参数,表示计算周期
@@ -187,9 +199,13 @@ __declspec(dllexport) int WINAPI WRITETOTXT(CALCINFO* pData)
 
     ofstream write(TodayTxtName, ios::app);//打开record.txt文件，以ios::app追加的方式输入
     //603855	华荣股份	2019-12-23 16:39	10.13	 0.10%	  871	连涨数天	
-    write << pData->m_strStkLabel << "\t" << "股票名称\t" << tmp << +"\t" << pData->m_pfParam1<<"\t" << pData->m_pfParam2<<"%\t" << pData->m_pfParam3 << "\t" << "预警条件" << endl;//数据写入文件
+    write << pData->m_strStkLabel << "\t" 
+        << "股票名称\t" << tmp << +"\t" 
+        << *pData->m_pfParam1<<"\t" 
+        << doubleRound(*pData->m_pfParam2*100,2)<<"%\t"
+        << *pData->m_pfParam3 << "\t" 
+        << "预警条件" << endl;//数据写入文件
     write.close();//关闭文件
 
     return -1;
 }
-
