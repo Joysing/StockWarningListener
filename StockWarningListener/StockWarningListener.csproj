@@ -92,6 +92,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StockEntity.cs" />
     <Compile Include="WindowAPI.cs" />
     <Compile Include="WindowsKeyCode.cs" />
     <Compile Include="WindowsMessage.cs" />

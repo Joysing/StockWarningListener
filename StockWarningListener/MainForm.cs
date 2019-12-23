@@ -24,10 +24,10 @@ namespace StockWarningListener
 
 
         //System.Globalization.DateTimeFormatInfo dtFormat = new System.Globalization.DateTimeFormatInfo();
-        System.Timers.Timer TipTimer = new System.Timers.Timer(100);//0.1秒执行一次
+        System.Timers.Timer timer = new System.Timers.Timer(100);//0.1秒执行一次
         int SendCount = 0;//已发送的行数
         int SendType = 0;//发送文字还是文件
-        string FilePath = @"D:\\Desktop\\预警输出股.txt";
+        string FilePath = @"D:\\dzh365\\WarningTxt";
         string QQWindowName = "";
         IntPtr QQWindowHandle;//QQ窗口句柄
         public MainForm()
@@ -48,13 +48,13 @@ namespace StockWarningListener
             uint KLF_ACTIVATE = 1;
             PostMessage(0xffff, 0x00500, IntPtr.Zero, LoadKeyboardLayout(en_US, KLF_ACTIVATE));//屏蔽中文输入法
 
-            //timer.Elapsed += delegate
-            //{
-            //    Thread thread1 = new Thread(Timer_TimesUp);
-            //    thread1.SetApartmentState(ApartmentState.STA);//要在线程里使用剪切板，必须设为STA模式
-            //    thread1.Start();
-            //};
-            //timer.AutoReset = true; //每到指定时间Elapsed事件是触发一次（false），还是一直触发（true）
+            timer.Elapsed += delegate
+            {
+                Thread thread1 = new Thread(Timer_TimesUp);
+                thread1.SetApartmentState(ApartmentState.STA);//要在线程里使用剪切板，必须设为STA模式
+                thread1.Start();
+            };
+            timer.AutoReset = true; //每到指定时间Elapsed事件是触发一次（false），还是一直触发（true）
             //YH_Client.Buy("600356",0,100);
             //Console.WriteLine(YH_Client.GetBalance());
             DZH_Warning.GetWarningData();
@@ -192,11 +192,11 @@ namespace StockWarningListener
                         MessageBox.Show("先选择QQ窗口");
                         return;
                     }
-                    //timer.Start();
+                    timer.Start();
                     button_Start.Text = "停止检测";
                     break;
                 case "停止检测":
-                    //timer.Stop();
+                    timer.Stop();
                     button_Start.Text = "开始检测";
                     break;
             }
@@ -209,6 +209,41 @@ namespace StockWarningListener
             {
                 SendCount = 0;
             }
+            try
+            {
+                StreamReader sr = new StreamReader(FilePath+@"\\"+ DateTime.Now.Year+ DateTime.Now.Month+ DateTime.Now.Day+ ".txt", Encoding.Default);
+                string line;
+                StringBuilder allLine = new StringBuilder();
+                int lineCount = 0;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    lineCount++;
+                    allLine.Append(line + "\n");
+                    //todo 买入，写dat文件保存已买入的股票
+                }
+                sr.Close();
+                if (lineCount > SendCount)//有新数据时
+                {
+                    SendCount = lineCount;
+                    allLine.Replace(DateTime.Now.ToString("yyyy-MM-dd"), "").Replace("\t", " ").Replace("  ", " ");
+                    allLine.ToString();
+                }
+                else
+                {
+                    return;
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                return;
+            }
+            
+            
+            
+        }
+
+        private void SendDataToQQ()
+        {
             string WarningData = GetWarningData();
             if (!"".Equals(WarningData))
             {
@@ -217,7 +252,8 @@ namespace StockWarningListener
                     //发送手打文字
                     //SendMessage(QQWindowName, WarningData);
 
-                    if (WarningData.Length < 4499) {
+                    if (WarningData.Length < 4499)
+                    {
                         //发送粘贴文字
                         Clipboard.SetDataObject(WarningData);
                     }
@@ -230,18 +266,7 @@ namespace StockWarningListener
                     }
                     SendMessageByClipboard();
 
-                    //int WarningDataSubStringLength = 4400;//每段长度，复制状态下，QQ一次最多只能发送4499字（中文）
-                    //int WarningDataSubStringCount = WarningData.Length / WarningDataSubStringLength + 1;//WarningData可以分成多少段
-                    //string[] WarningDataSubString = new string[WarningDataSubStringCount];
-                    //for(int i=0;i< WarningDataSubStringCount; i++)
-                    //{
-                    //    System.Collections.Specialized.StringCollection strcoll = new System.Collections.Specialized.StringCollection();
-                    //    int indexStart = i * WarningDataSubStringLength;
-                    //    int indexEnd = WarningData.Length - indexStart > WarningDataSubStringLength ? WarningDataSubStringLength : WarningData.Length - indexStart;
-                    //    Clipboard.SetDataObject(WarningData.Substring(indexStart, indexEnd),true);
-                    //    SendMessageByClipboard(QQWindowName);
-                    //    //WarningDataSubString[i] = WarningData.Substring(i* WarningDataSubStringLength, WarningDataSubStringLength);
-                    //}
+
 
                 }
                 else if (SendType == 1)
@@ -257,9 +282,7 @@ namespace StockWarningListener
                     CallQQPhone();
                 }
             }
-            
         }
-
         private void ComboBox_SendType_SelectedIndexChanged(object sender, EventArgs e)
         {
             SendType = comboBox_SendType.SelectedIndex;
