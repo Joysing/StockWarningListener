@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.Button button_YHClientPath;
             this.button_TestSendMsg = new System.Windows.Forms.Button();
             this.comboBox_QQWindows = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -39,6 +40,9 @@
             this.button_selectFilePath = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.checkBox_CallPhone = new System.Windows.Forms.CheckBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBox_YHClientPath = new System.Windows.Forms.TextBox();
+            button_YHClientPath = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // button_TestSendMsg
@@ -150,11 +154,42 @@
             this.checkBox_CallPhone.Text = "同时拨打QQ电话";
             this.checkBox_CallPhone.UseVisualStyleBackColor = true;
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(518, 16);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(97, 15);
+            this.label4.TabIndex = 13;
+            this.label4.Text = "银河证券路径";
+            // 
+            // button_YHClientPath
+            // 
+            button_YHClientPath.Location = new System.Drawing.Point(889, 11);
+            button_YHClientPath.Name = "button_YHClientPath";
+            button_YHClientPath.Size = new System.Drawing.Size(78, 27);
+            button_YHClientPath.TabIndex = 12;
+            button_YHClientPath.Text = "浏览…";
+            button_YHClientPath.UseVisualStyleBackColor = true;
+            button_YHClientPath.Click += new System.EventHandler(this.button_YHClientPath_Click);
+            // 
+            // textBox_YHClientPath
+            // 
+            this.textBox_YHClientPath.Enabled = false;
+            this.textBox_YHClientPath.Location = new System.Drawing.Point(621, 13);
+            this.textBox_YHClientPath.Multiline = true;
+            this.textBox_YHClientPath.Name = "textBox_YHClientPath";
+            this.textBox_YHClientPath.Size = new System.Drawing.Size(262, 25);
+            this.textBox_YHClientPath.TabIndex = 11;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(501, 318);
+            this.ClientSize = new System.Drawing.Size(1083, 468);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(button_YHClientPath);
+            this.Controls.Add(this.textBox_YHClientPath);
             this.Controls.Add(this.checkBox_CallPhone);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.button_selectFilePath);
@@ -187,6 +222,8 @@
         private System.Windows.Forms.Button button_selectFilePath;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.CheckBox checkBox_CallPhone;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox textBox_YHClientPath;
     }
 }
 

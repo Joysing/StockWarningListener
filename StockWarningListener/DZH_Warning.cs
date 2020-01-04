@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,11 +13,11 @@ namespace StockWarningListener
     /// </summary>
     public class DZH_Warning
     {
-        
+        public int SendCount = 0;
         /// <summary>
-        /// 获取预警数据
+        /// 从窗口获取预警数据
         /// </summary>
-        public static void GetWarningData()
+        public static void GetWarningDataFromWindow()
         {
             IntPtr HandleWarning = FindWindowEx(IntPtr.Zero, IntPtr.Zero, "#32770", null);
             IntPtr HandleWarningList;
@@ -81,6 +82,52 @@ namespace StockWarningListener
                 }
             }
             //
+
+        }
+
+        /// <summary>
+        /// 从文件获取预警数据
+        /// </summary>
+        public string GetWarningDataFromTxt(string FilePath)
+        {
+            if (DateTime.Now.Hour == 0 && DateTime.Now.Minute == 0)//0点时更新发送的行数
+            {
+                SendCount = 0;
+            }
+            try
+            {
+                StreamReader sr = new StreamReader(FilePath, Encoding.Default);
+                string line;
+                StringBuilder allLine = new StringBuilder();
+                int lineCount = 0;
+                DateTime dateTime;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    DateTime.TryParse(line.Split('\t')[2].Split(' ')[0], out dateTime);
+                    int compNum = DateTime.Compare(dateTime, DateTime.Today);
+                    // 今天输出的预警数据
+                    if (compNum == 0)
+                    {
+                        lineCount++;
+                        allLine.Append(line + "\n");
+                    }
+                }
+                sr.Close();
+                if (lineCount > SendCount)//有新数据时
+                {
+                    SendCount = lineCount;
+                    allLine.Replace(DateTime.Now.ToString("yyyy-MM-dd"), "").Replace("\t", " ").Replace("  ", " ");
+                    return allLine.ToString();
+                }
+                else
+                {
+                    return "";
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                return "";
+            }
 
         }
     }

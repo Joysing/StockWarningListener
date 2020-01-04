@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -14,6 +15,42 @@ namespace StockWarningListener
         public static int PROCESS_VM_WRITE = 0x0020;
         public static int LVIF_TEXT = 0x0001;
 
+        /// <summary>
+        /// 获取控件图片
+        /// </summary>
+        /// <param name="handle">图片控件句柄</param>
+        /// <param name="dwRop">光栅运算代码</param>
+        /// <returns></returns>
+        public static Bitmap CaptureWindow(IntPtr handle, int dwRop)
+
+        {
+            // get te hDC of the target window
+            IntPtr hdcSrc = GetWindowDC(handle);
+            // get the size
+            RECT windowRect = new RECT();
+            GetWindowRect(handle, ref windowRect);
+            int width = windowRect.right - windowRect.left;
+            int height = windowRect.bottom - windowRect.top;
+            // create a device context we can copy to
+            IntPtr hdcDest = CreateCompatibleDC(hdcSrc);
+            // create a bitmap we can copy it to,
+            // using GetDeviceCaps to get the width/height
+            IntPtr hBitmap = CreateCompatibleBitmap(hdcSrc, width, height);
+            // select the bitmap object
+            IntPtr hOld = SelectObject(hdcDest, hBitmap);
+            // bitblt over
+            BitBlt(hdcDest, 0, 0, width, height, hdcSrc, 0, 0, dwRop);
+            // restore selection
+            SelectObject(hdcDest, hOld);
+            // clean up
+            DeleteDC(hdcDest);
+            ReleaseDC(handle, hdcSrc);
+            // get a .NET image object for it
+            Bitmap img = Image.FromHbitmap(hBitmap);
+            // free up the Bitmap object
+            DeleteObject(hBitmap);
+            return img;
+        }
         /// <summary>
         /// 获取第几个子控件
         /// </summary>
@@ -54,6 +91,15 @@ namespace StockWarningListener
             public int iGroupId;
             public int cColumns;
             public IntPtr puColumns;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
         }
 
         [DllImport("user32.dll")]
@@ -132,5 +178,31 @@ namespace StockWarningListener
 
         [DllImport("kernel32.dll")]
         public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, IntPtr lpBuffer, int nSize, ref uint vNumberOfBytesRead);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetDesktopWindow();
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindowDC(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        public static extern IntPtr ReleaseDC(IntPtr hWnd, IntPtr hDC);
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindowRect(IntPtr hWnd, ref RECT rect);
+
+        public const int SRCCOPY = 0x00CC0020; // BitBlt dwRop parameter
+        [DllImport("gdi32.dll")]
+        public static extern bool BitBlt(IntPtr hObject, int nXDest, int nYDest,
+        int nWidth, int nHeight, IntPtr hObjectSource,
+        int nXSrc, int nYSrc, int dwRop);
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateCompatibleBitmap(IntPtr hDC, int nWidth,
+        int nHeight);
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateCompatibleDC(IntPtr hDC);
+        [DllImport("gdi32.dll")]
+        public static extern bool DeleteDC(IntPtr hDC);
+        [DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr SelectObject(IntPtr hDC, IntPtr hObject);
     }
 }

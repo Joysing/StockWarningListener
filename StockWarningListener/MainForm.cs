@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 using System.Threading;
 using System.Configuration;
+using TCMS.DBUtility;
 
 namespace StockWarningListener
 {
@@ -20,7 +21,7 @@ namespace StockWarningListener
         const int MOUSEEVENTF_MIDDLEDOWN = 0x0020;//模拟鼠标中键按下 
         const int MOUSEEVENTF_MIDDLEUP = 0x0040;//模拟鼠标中键抬起 
         const int MOUSEEVENTF_ABSOLUTE = 0x8000;//标示是否采用绝对坐标 （左上角为[0,0]，右下角为[65535,65535]）
-        const int BM_CLICK = 0xF5;//单击
+        
 
 
         //System.Globalization.DateTimeFormatInfo dtFormat = new System.Globalization.DateTimeFormatInfo();
@@ -28,6 +29,7 @@ namespace StockWarningListener
         int SendCount = 0;//已发送的行数
         int SendType = 0;//发送文字还是文件
         string FilePath = @"D:\\dzh365\\WarningTxt";
+        string YHClientPath;
         string QQWindowName = "";
         IntPtr QQWindowHandle;//QQ窗口句柄
         public MainForm()
@@ -36,8 +38,9 @@ namespace StockWarningListener
             comboBox_SendType.SelectedIndex = 0;
             FilePath = ConfigurationManager.AppSettings["FilePath"].ToString().Trim();
             textBox_FilePath.Text = AppSettingUtils.GetAppSettingsValue("FilePath");
+            textBox_YHClientPath.Text = AppSettingUtils.GetAppSettingsValue("YHClientPath");
             //dtFormat.ShortDatePattern = "yyyy-MM-dd";
-
+            YH_Client.AutoLogin();
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -57,7 +60,7 @@ namespace StockWarningListener
             timer.AutoReset = true; //每到指定时间Elapsed事件是触发一次（false），还是一直触发（true）
             //YH_Client.Buy("600356",0,100);
             //Console.WriteLine(YH_Client.GetBalance());
-            DZH_Warning.GetWarningData();
+            
         }
 
 
@@ -83,47 +86,6 @@ namespace StockWarningListener
         private static extern bool PostMessage(int hhwnd, uint msg, IntPtr wparam, IntPtr lparam);
         [DllImport("user32")]
         public static extern int mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
-
-        /// <summary>
-        /// 获取预警数据
-        /// </summary>
-        public string GetWarningData()
-        {
-            try
-            {
-                StreamReader sr = new StreamReader(FilePath, Encoding.Default);
-                string line;
-                StringBuilder allLine = new StringBuilder();
-                int lineCount = 0;
-                DateTime dateTime;
-                while ((line = sr.ReadLine()) != null)
-                {
-                    DateTime.TryParse(line.Split('\t')[2].Split(' ')[0], out dateTime);
-                    int compNum = DateTime.Compare(dateTime, DateTime.Today);
-                    // 今天输出的预警数据
-                    if (compNum == 0)
-                    {
-                        lineCount++;
-                        allLine.Append(line + "\n");
-                    }
-                }
-                sr.Close();
-                if (lineCount > SendCount)//有新数据时
-                {
-                    SendCount = lineCount;
-                    allLine.Replace(DateTime.Now.ToString("yyyy-MM-dd"), "").Replace("\t", " ").Replace("  ", " ");
-                    return allLine.ToString();
-                }
-                else
-                {
-                    return "";
-                }
-            }catch (FileNotFoundException)
-            {
-                return "";
-            }
-            
-        }
 
         //发送消息
         /// <summary>
@@ -242,9 +204,9 @@ namespace StockWarningListener
             
         }
 
-        private void SendDataToQQ()
+        private void SendDataToQQ(string WarningData)
         {
-            string WarningData = GetWarningData();
+
             if (!"".Equals(WarningData))
             {
                 if (SendType == 0)
@@ -406,6 +368,20 @@ namespace StockWarningListener
             mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE, (WindowFx.Right - 128) * 65535 / ScreenWidth, (WindowFx.Top + 106) * 65535 / ScreenHeight, 0, 0);
             mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTDOWN, (WindowFx.Right - 128) * 65535 / ScreenWidth, (WindowFx.Top + 106) * 65535 / ScreenHeight, 0, 0);
             mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_LEFTUP, (WindowFx.Right - 128) * 65535 / ScreenWidth, (WindowFx.Top + 106) * 65535 / ScreenHeight, 0, 0);
+        }
+
+        private void button_YHClientPath_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Multiselect = false;//该值确定是否可以选择多个文件
+            dialog.Title = "请选择文件";
+            dialog.Filter = "EXE文件|*.exe;*.exe";
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                textBox_YHClientPath.Text = dialog.FileName;
+                FilePath = dialog.FileName;
+                AppSettingUtils.UpdateAppSettings("YHClientPath", dialog.FileName);
+            }
         }
     }
 }

@@ -244,6 +244,8 @@ namespace StockWarningListener
         public const int LVM_FIRST = 0x1000;
         public const int LVM_GETITEMCOUNT = LVM_FIRST + 4;
         public const int LVM_GETITEMW = LVM_FIRST + 75;
+
+        public const int BM_CLICK = 0xF5;//单击
         ///////////////////////////////////////////////////////////////////// 
         //通知消息(Notification message)是指这样一种消息，一个窗口内的子控件发生了一些事情，需要通 
         //知父窗口。通知消息只适用于标准的窗口控件如按钮、列表框、组合框、编辑框，以及Windows 95公 
