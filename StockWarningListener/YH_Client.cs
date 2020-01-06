@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -141,13 +142,19 @@ namespace StockWarningListener
         /// <summary>
         /// 自动登录
         /// </summary>
-        public static void AutoLogin()
+        public static void AutoLogin(string username,string password)
         {
-            if (CheckAndOpenExe("xiadan.exe"))
+            string ExeTitle = CheckAndOpenExe("xiadan");
+            //已登录
+            if ("网上股票交易系统5.0".Equals(ExeTitle))
             {
                 return;
+            //软件还没打开
+            }else if (ExeTitle == null)
+            {
+                OpenExe(YH_ClientPath);
             }
-            OpenExe(YH_ClientPath);
+                
             IntPtr LoginWindowHandle = IntPtr.Zero;
             while ((int)LoginWindowHandle <= 0)
             {
@@ -172,9 +179,9 @@ namespace StockWarningListener
                 WindowAPI.SetForegroundWindow(LoginWindowHandle); //把窗体置于最前
                 WindowAPI.SendMessage(RatioButtonHandle, WindowsMessage.WM_LBUTTONDOWN, 0, "");
                 WindowAPI.SendMessage(RatioButtonHandle, WindowsMessage.WM_LBUTTONUP, 0, "");
-                WindowAPI.SendMessage(EditUserHandle, WindowsMessage.WM_SETTEXT, 0, "331200281032");
+                WindowAPI.SendMessage(EditUserHandle, WindowsMessage.WM_SETTEXT, 0, username);
                 WindowAPI.SendMessage(EditPasswordHandle, WindowsMessage.WM_SETFOCUS, 0, "");
-                SendKeys.SendWait("888888");
+                SendKeys.SendWait(password);
                 FillVerifyCode(EditVerifyCodeHandle, ImageVerifyCodeHandle, ButtonLoginHandle);
 
                 while (true)
@@ -211,7 +218,9 @@ namespace StockWarningListener
             ImageAI imageAI = new ImageAI(validationCodeImage);
             string codeResult = imageAI.GetVerifyCode();
             WindowAPI.SendMessage(EditVerifyCodeHandle, WindowsMessage.WM_SETFOCUS, 0, "");
+            Thread.Sleep(100);
             SendKeys.SendWait(codeResult);
+            Thread.Sleep(100);
             WindowAPI.SendMessage(ButtonLoginHandle, WindowsMessage.BM_CLICK, 1, "");
             while (true)
             {
@@ -229,6 +238,7 @@ namespace StockWarningListener
                     
                     if ("验证码错误，请重新输入！".Equals(TipContent.ToString()))
                     {
+                        Thread.Sleep(100);
                         SendKeys.SendWait("{ENTER}");
 
                         FillVerifyCode(EditVerifyCodeHandle, ImageVerifyCodeHandle, ButtonLoginHandle);
@@ -244,16 +254,16 @@ namespace StockWarningListener
         }
         #region 通过当前代码执行路径向上找到相关exe，并根据processes.Length判断是否已启动
 
-        private static bool CheckAndOpenExe(string exeName)
+        private static string CheckAndOpenExe(string exeName)
         {
             Process[] processes = Process.GetProcessesByName(exeName);
             if (processes.Length > 0)
             {
-                return true;
+                return processes[0].MainWindowTitle;
             }
             else
             {
-                return false;
+                return null;
             }
         }
 
@@ -279,8 +289,6 @@ namespace StockWarningListener
 
             }
         }
-
-
 
         public static string AssemblyDirectory
         {

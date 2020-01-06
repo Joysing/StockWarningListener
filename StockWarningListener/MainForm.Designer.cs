@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             System.Windows.Forms.Button button_YHClientPath;
+            System.Windows.Forms.Button button_saveUser;
             this.button_TestSendMsg = new System.Windows.Forms.Button();
             this.comboBox_QQWindows = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -42,8 +43,23 @@
             this.checkBox_CallPhone = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.textBox_YHClientPath = new System.Windows.Forms.TextBox();
+            this.textBox_YHUserName = new System.Windows.Forms.TextBox();
+            this.textBox_YHPassword = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             button_YHClientPath = new System.Windows.Forms.Button();
+            button_saveUser = new System.Windows.Forms.Button();
             this.SuspendLayout();
+            // 
+            // button_YHClientPath
+            // 
+            button_YHClientPath.Location = new System.Drawing.Point(889, 11);
+            button_YHClientPath.Name = "button_YHClientPath";
+            button_YHClientPath.Size = new System.Drawing.Size(78, 27);
+            button_YHClientPath.TabIndex = 12;
+            button_YHClientPath.Text = "浏览…";
+            button_YHClientPath.UseVisualStyleBackColor = true;
+            button_YHClientPath.Click += new System.EventHandler(this.button_YHClientPath_Click);
             // 
             // button_TestSendMsg
             // 
@@ -163,16 +179,6 @@
             this.label4.TabIndex = 13;
             this.label4.Text = "银河证券路径";
             // 
-            // button_YHClientPath
-            // 
-            button_YHClientPath.Location = new System.Drawing.Point(889, 11);
-            button_YHClientPath.Name = "button_YHClientPath";
-            button_YHClientPath.Size = new System.Drawing.Size(78, 27);
-            button_YHClientPath.TabIndex = 12;
-            button_YHClientPath.Text = "浏览…";
-            button_YHClientPath.UseVisualStyleBackColor = true;
-            button_YHClientPath.Click += new System.EventHandler(this.button_YHClientPath_Click);
-            // 
             // textBox_YHClientPath
             // 
             this.textBox_YHClientPath.Enabled = false;
@@ -182,11 +188,60 @@
             this.textBox_YHClientPath.Size = new System.Drawing.Size(262, 25);
             this.textBox_YHClientPath.TabIndex = 11;
             // 
+            // textBox_YHUserName
+            // 
+            this.textBox_YHUserName.Location = new System.Drawing.Point(621, 52);
+            this.textBox_YHUserName.Multiline = true;
+            this.textBox_YHUserName.Name = "textBox_YHUserName";
+            this.textBox_YHUserName.Size = new System.Drawing.Size(262, 25);
+            this.textBox_YHUserName.TabIndex = 14;
+            // 
+            // textBox_YHPassword
+            // 
+            this.textBox_YHPassword.Location = new System.Drawing.Point(621, 93);
+            this.textBox_YHPassword.Multiline = true;
+            this.textBox_YHPassword.Name = "textBox_YHPassword";
+            this.textBox_YHPassword.Size = new System.Drawing.Size(262, 25);
+            this.textBox_YHPassword.TabIndex = 15;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(518, 59);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(97, 15);
+            this.label5.TabIndex = 16;
+            this.label5.Text = "银河证券账号";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(518, 100);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(97, 15);
+            this.label6.TabIndex = 17;
+            this.label6.Text = "银河证券密码";
+            // 
+            // button_saveUser
+            // 
+            button_saveUser.Location = new System.Drawing.Point(889, 52);
+            button_saveUser.Name = "button_saveUser";
+            button_saveUser.Size = new System.Drawing.Size(87, 65);
+            button_saveUser.TabIndex = 18;
+            button_saveUser.Text = "保存账号";
+            button_saveUser.UseVisualStyleBackColor = true;
+            button_saveUser.Click += new System.EventHandler(this.button_saveUser_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1083, 468);
+            this.Controls.Add(button_saveUser);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.textBox_YHPassword);
+            this.Controls.Add(this.textBox_YHUserName);
             this.Controls.Add(this.label4);
             this.Controls.Add(button_YHClientPath);
             this.Controls.Add(this.textBox_YHClientPath);
@@ -224,6 +279,10 @@
         private System.Windows.Forms.CheckBox checkBox_CallPhone;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox textBox_YHClientPath;
+        private System.Windows.Forms.TextBox textBox_YHUserName;
+        private System.Windows.Forms.TextBox textBox_YHPassword;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
     }
 }
 

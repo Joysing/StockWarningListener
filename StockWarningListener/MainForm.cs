@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading;
 using System.Configuration;
 using TCMS.DBUtility;
+using System.Data;
 
 namespace StockWarningListener
 {
@@ -39,8 +40,7 @@ namespace StockWarningListener
             FilePath = ConfigurationManager.AppSettings["FilePath"].ToString().Trim();
             textBox_FilePath.Text = AppSettingUtils.GetAppSettingsValue("FilePath");
             textBox_YHClientPath.Text = AppSettingUtils.GetAppSettingsValue("YHClientPath");
-            //dtFormat.ShortDatePattern = "yyyy-MM-dd";
-            YH_Client.AutoLogin();
+
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -60,6 +60,15 @@ namespace StockWarningListener
             timer.AutoReset = true; //每到指定时间Elapsed事件是触发一次（false），还是一直触发（true）
             //YH_Client.Buy("600356",0,100);
             //Console.WriteLine(YH_Client.GetBalance());
+            DataSet data = DBHelperSQLite.Query("select * from t_user");
+            if (data.Tables[0].Rows.Count > 0)
+            {
+                string username= Convert.ToString(data.Tables[0].Rows[0]["Username"]);
+                string password= Convert.ToString(data.Tables[0].Rows[0]["Password"]);
+                textBox_YHUserName.Text = username;
+                textBox_YHPassword.Text = password;
+                YH_Client.AutoLogin(username, password);
+            }
             
         }
 
@@ -382,6 +391,13 @@ namespace StockWarningListener
                 FilePath = dialog.FileName;
                 AppSettingUtils.UpdateAppSettings("YHClientPath", dialog.FileName);
             }
+        }
+
+        private void button_saveUser_Click(object sender, EventArgs e)
+        {
+            string UserName = textBox_YHUserName.Text;
+            string Password = textBox_YHPassword.Text;
+            DBHelperSQLite.ExecuteSql("update t_User set UserName='"+ UserName + "'"+ ",Password = '" + Password + "'");
         }
     }
 }
