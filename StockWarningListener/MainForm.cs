@@ -60,7 +60,7 @@ namespace StockWarningListener
             timer.AutoReset = true; //每到指定时间Elapsed事件是触发一次（false），还是一直触发（true）
             //YH_Client.Buy("600356",0,100);
             //Console.WriteLine(YH_Client.GetBalance());
-            DataSet data = DBHelperSQLite.Query("select * from t_user");
+            DataSet data = DBHelperSQLite.Query("select * from t_user WHERE clientType='YH'");
             if (data.Tables[0].Rows.Count > 0)
             {
                 string username= Convert.ToString(data.Tables[0].Rows[0]["Username"]);
@@ -397,7 +397,22 @@ namespace StockWarningListener
         {
             string UserName = textBox_YHUserName.Text;
             string Password = textBox_YHPassword.Text;
-            DBHelperSQLite.ExecuteSql("update t_User set UserName='"+ UserName + "'"+ ",Password = '" + Password + "'");
+            DBHelperSQLite.ExecuteSql("update t_User set UserName='"+ UserName + "'"+ ",Password = '" + Password + "' WHERE clientType='YH'");
+        }
+
+        private void button_getBalance_Click(object sender, EventArgs e)
+        {
+            
+            dataGridView_warehouse.Rows.Clear();
+            int index = dataGridView_warehouse.Rows.Add();
+            dataGridView_warehouse.Rows[index].Cells[0].Value = "600366";
+            dataGridView_warehouse.Rows[index].Cells[1].Value = "不不不";
+            dataGridView_warehouse.Rows[index].Cells[2].Value = 1000;
+            dataGridView_warehouse.Rows[index].Cells[3].Value = 1000;
+            dataGridView_warehouse.Rows[index].Cells[4].Value = 2.55;
+            dataGridView_warehouse.Rows[index].Cells[5].Value = 2550;
+            dataGridView_warehouse.Rows[index].Cells[6].Value = 2.55;
+
         }
     }
 }
