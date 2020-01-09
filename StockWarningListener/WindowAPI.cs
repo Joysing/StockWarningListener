@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
+using MSExcel = Microsoft.Office.Interop.Excel;
 
 namespace StockWarningListener
 {
@@ -14,6 +14,27 @@ namespace StockWarningListener
         public static int PROCESS_VM_READ = 0x0010;
         public static int PROCESS_VM_WRITE = 0x0020;
         public static int LVIF_TEXT = 0x0001;
+
+
+        /// <summary>
+        /// 杀死指定Excel进程
+        /// </summary>
+        /// <param name="excel"></param>
+        public static void Kill(MSExcel.Application excel)
+        {
+            try
+            {
+                IntPtr t = new IntPtr(excel.Hwnd);  //得到这个句柄，具体作用是得到这块内存入口
+                int k = 0;
+                GetWindowThreadProcessId(t, out k);  //得到本进程唯一标志k
+                System.Diagnostics.Process p = System.Diagnostics.Process.GetProcessById(k);  //得到对进程k的引用
+                p.Kill();   //关闭进程k
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
         /// <summary>
         /// 获取控件图片

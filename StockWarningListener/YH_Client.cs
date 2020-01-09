@@ -8,7 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using MSExcel = Microsoft.Office.Interop.Excel;
 using System.Windows.Forms;
 
 namespace StockWarningListener
@@ -19,10 +19,28 @@ namespace StockWarningListener
     public class YH_Client
     {
         private static string YH_ClientPath=ConfigurationManager.AppSettings["YHClientPath"].ToString().Trim();
+        List<string> excelColumn = new List<string>() { 
+            "",
+            "证券代码",
+            "证券名称",
+            "当前持仓",
+            "可用余额",
+            "买入冻结",
+            "卖出冻结",
+            "参考盈亏",
+            "盈亏比例(%)",
+            "参考市值",
+            "参考成本价",
+            "参考市价",
+            "股东代码",
+            "交易市场",
+            "股份实时余额",
+            "股份余额"
+        };//用于保存excel的表头名称，及其位置
         /// <summary>
-        /// 获取资金状况
+        /// 获取持仓状况
         /// </summary>
-        public static StringBuilder GetBalance()
+        public static void GetBalance(DataGridView dataGridView_warehouse)
         {
             IntPtr YHWindowHandle = WindowAPI.FindWindow(null, "网上股票交易系统5.0");
             IntPtr Handle32770a = WindowAPI.FindWindowEx(YHWindowHandle, IntPtr.Zero, "#32770", null);
@@ -39,7 +57,74 @@ namespace StockWarningListener
             sb.Append("，市值：").Append(sbTemp.ToString());
             WindowAPI.SendMessage(HandleAssets, WindowsMessage.WM_GETTEXT, 128, sbTemp);
             sb.Append("，总资产：").Append(sbTemp.ToString());
-            return sb;
+
+            WindowAPI.SetForegroundWindow(YHWindowHandle); //把窗体置于最前
+            SendKeys.SendWait("{F4}"); //模拟键盘输入F4查询界面
+            Thread.Sleep(500);
+            SendKeys.SendWait("^s"); //Ctrl + S
+            Thread.Sleep(1000);
+            IntPtr HandleSaveAs = WindowAPI.FindWindowEx(IntPtr.Zero, IntPtr.Zero, "#32770", "另存为");
+            IntPtr HandleSaveAsEdit = WindowAPI.FindWindowEx(HandleSaveAs, IntPtr.Zero, "Edit", null);
+            IntPtr HandleSaveButton = WindowAPI.FindWindowEx(HandleSaveAs, IntPtr.Zero, "Button", "保存(&S)");
+            if ((int)HandleSaveButton > 0)
+            {
+                TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+                string tablesFileName= Application.StartupPath+"\\"+Convert.ToInt64(ts.TotalMilliseconds).ToString() + ".xls";
+                WindowAPI.SendMessage(HandleSaveAsEdit, WindowsMessage.WM_SETTEXT, 0, tablesFileName);
+                WindowAPI.SendMessage(HandleSaveButton, WindowsMessage.BM_CLICK, 1, "");
+
+                #region 读取excel
+                MSExcel.Application excelApp = new MSExcel.Application
+                {
+                    Visible = false//是打开可见
+                };
+                MSExcel.Workbooks _workbooks = excelApp.Workbooks;
+                MSExcel._Workbook _workbook = _workbooks.Add(tablesFileName);
+                MSExcel._Worksheet worksheet;
+                worksheet = _workbook.Sheets[1];//获取第一张工作表
+                worksheet.Activate();
+
+                int excelIndex = 2;//第一行是表头，从第二行开始才是数据
+                while (true)
+                {
+                    //证券代码 证券名称 当前持仓 可用余额 买入冻结 卖出冻结 参考盈亏 盈亏比例(%) 参考市值 参考成本价 参考市价 股东代码 交易市场 股份实时余额 股份余额
+                    //300096   易联众  1100    1100      0         0      -27    -0.231      11638   10.605    10.58  174788455  深Ａ    1100       1100
+                    MSExcel.Range rangStockCode = (MSExcel.Range)worksheet.Cells[excelIndex, 1];
+                    if (rangStockCode.Value != null)
+                    {
+                        string stockCode = Convert.ToString(rangStockCode.Value);
+                        string stockName = Convert.ToString(((MSExcel.Range)worksheet.Cells[excelIndex, 2]).Value);
+                        int currentQty = Convert.ToInt32(((MSExcel.Range)worksheet.Cells[excelIndex, 3]).Value);
+                        int availableQty = Convert.ToInt32(((MSExcel.Range)worksheet.Cells[excelIndex, 4]).Value);
+                        double marketValue = Convert.ToDouble(((MSExcel.Range)worksheet.Cells[excelIndex, 9]).Value);
+                        double costPrice = Convert.ToDouble(((MSExcel.Range)worksheet.Cells[excelIndex, 10]).Value);
+
+                        int index = dataGridView_warehouse.Rows.Add();
+                        dataGridView_warehouse.Rows[index].Cells[0].Value = stockCode;
+                        dataGridView_warehouse.Rows[index].Cells[1].Value = stockName;
+                        dataGridView_warehouse.Rows[index].Cells[2].Value = currentQty;
+                        dataGridView_warehouse.Rows[index].Cells[3].Value = availableQty;
+                        dataGridView_warehouse.Rows[index].Cells[4].Value = 0;
+                        dataGridView_warehouse.Rows[index].Cells[5].Value = marketValue;
+                        dataGridView_warehouse.Rows[index].Cells[6].Value = costPrice;
+
+                    }
+                    else
+                    {
+                        break;
+                    }
+                    excelIndex++;
+                }
+                File.Delete(tablesFileName);
+                //关闭Excel对象
+                Marshal.ReleaseComObject(_workbook);
+                Marshal.ReleaseComObject(worksheet);
+                excelApp.Quit();
+                WindowAPI.Kill(excelApp);//调用方法关闭进程
+                GC.Collect();
+                #endregion
+            }
+
         }
 
         /// <summary>
@@ -142,13 +227,18 @@ namespace StockWarningListener
         /// <summary>
         /// 自动登录
         /// </summary>
-        public static void AutoLogin(string username,string password)
+        public static bool AutoLogin(string username,string password)
         {
+            if("".Equals(username)|| "".Equals(password))
+            {
+                MessageBox.Show("银河账户或密码不能为空！");
+                return false;
+            }
             string ExeTitle = CheckAndOpenExe("xiadan");
             //已登录
             if ("网上股票交易系统5.0".Equals(ExeTitle))
             {
-                return;
+                return true;
             //软件还没打开
             }else if (ExeTitle == null)
             {
@@ -209,6 +299,7 @@ namespace StockWarningListener
                     }
                 }
             }
+            return true;
 
         }
 

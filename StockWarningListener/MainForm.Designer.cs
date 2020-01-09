@@ -49,7 +49,11 @@
             this.label6 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.button_getBalance = new System.Windows.Forms.Button();
+            this.label_available = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label_balance = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.dataGridView_warehouse = new System.Windows.Forms.DataGridView();
             this.stockCode = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.stockName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -58,11 +62,9 @@
             this.newPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.marketValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.cost = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label_balance = new System.Windows.Forms.Label();
-            this.label_available = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.button_getBalance = new System.Windows.Forms.Button();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.button_selectDZHPath = new System.Windows.Forms.Button();
+            this.textBox_dzhPath = new System.Windows.Forms.TextBox();
             button_YHClientPath = new System.Windows.Forms.Button();
             button_saveUser = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
@@ -181,11 +183,11 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(26, 16);
+            this.label3.Location = new System.Drawing.Point(533, 136);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(67, 15);
+            this.label3.Size = new System.Drawing.Size(82, 15);
             this.label3.TabIndex = 9;
-            this.label3.Text = "监控文件";
+            this.label3.Text = "大智慧目录";
             // 
             // checkBox_CallPhone
             // 
@@ -277,15 +279,51 @@
             this.tabPage1.Text = "资金股份";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // tabPage2
+            // button_getBalance
             // 
-            this.tabPage2.Location = new System.Drawing.Point(4, 25);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(192, 71);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
+            this.button_getBalance.Location = new System.Drawing.Point(938, 7);
+            this.button_getBalance.Name = "button_getBalance";
+            this.button_getBalance.Size = new System.Drawing.Size(106, 23);
+            this.button_getBalance.TabIndex = 24;
+            this.button_getBalance.Text = "刷新持仓";
+            this.button_getBalance.UseVisualStyleBackColor = true;
+            this.button_getBalance.Click += new System.EventHandler(this.button_getBalance_Click);
+            // 
+            // label_available
+            // 
+            this.label_available.ForeColor = System.Drawing.Color.Red;
+            this.label_available.Location = new System.Drawing.Point(202, 17);
+            this.label_available.Name = "label_available";
+            this.label_available.Size = new System.Drawing.Size(100, 15);
+            this.label_available.TabIndex = 23;
+            this.label_available.Text = "0.00";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(159, 17);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(37, 15);
+            this.label9.TabIndex = 22;
+            this.label9.Text = "可用";
+            // 
+            // label_balance
+            // 
+            this.label_balance.ForeColor = System.Drawing.Color.Red;
+            this.label_balance.Location = new System.Drawing.Point(53, 17);
+            this.label_balance.Name = "label_balance";
+            this.label_balance.Size = new System.Drawing.Size(100, 15);
+            this.label_balance.TabIndex = 21;
+            this.label_balance.Text = "0.00";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(10, 17);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(37, 15);
+            this.label7.TabIndex = 20;
+            this.label7.Text = "余额";
             // 
             // dataGridView_warehouse
             // 
@@ -311,6 +349,7 @@
             this.stockCode.HeaderText = "证券代码";
             this.stockCode.MinimumWidth = 6;
             this.stockCode.Name = "stockCode";
+            this.stockCode.ReadOnly = true;
             this.stockCode.Width = 125;
             // 
             // stockName
@@ -318,6 +357,7 @@
             this.stockName.HeaderText = "证券名称";
             this.stockName.MinimumWidth = 6;
             this.stockName.Name = "stockName";
+            this.stockName.ReadOnly = true;
             this.stockName.Width = 125;
             // 
             // qty
@@ -325,6 +365,7 @@
             this.qty.HeaderText = "股票数量";
             this.qty.MinimumWidth = 6;
             this.qty.Name = "qty";
+            this.qty.ReadOnly = true;
             this.qty.Width = 125;
             // 
             // canSellQty
@@ -332,6 +373,7 @@
             this.canSellQty.HeaderText = "可卖数量";
             this.canSellQty.MinimumWidth = 6;
             this.canSellQty.Name = "canSellQty";
+            this.canSellQty.ReadOnly = true;
             this.canSellQty.Width = 125;
             // 
             // newPrice
@@ -339,6 +381,7 @@
             this.newPrice.HeaderText = "最新价";
             this.newPrice.MinimumWidth = 6;
             this.newPrice.Name = "newPrice";
+            this.newPrice.ReadOnly = true;
             this.newPrice.Width = 125;
             // 
             // marketValue
@@ -346,6 +389,7 @@
             this.marketValue.HeaderText = "股票市值";
             this.marketValue.MinimumWidth = 6;
             this.marketValue.Name = "marketValue";
+            this.marketValue.ReadOnly = true;
             this.marketValue.Width = 125;
             // 
             // cost
@@ -353,59 +397,45 @@
             this.cost.HeaderText = "盈亏/成本";
             this.cost.MinimumWidth = 6;
             this.cost.Name = "cost";
+            this.cost.ReadOnly = true;
             this.cost.Width = 125;
             // 
-            // label7
+            // tabPage2
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(10, 17);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(37, 15);
-            this.label7.TabIndex = 20;
-            this.label7.Text = "余额";
+            this.tabPage2.Location = new System.Drawing.Point(4, 25);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(1051, 247);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // label_balance
+            // button_selectDZHPath
             // 
-            this.label_balance.ForeColor = System.Drawing.Color.Red;
-            this.label_balance.Location = new System.Drawing.Point(53, 17);
-            this.label_balance.Name = "label_balance";
-            this.label_balance.Size = new System.Drawing.Size(100, 15);
-            this.label_balance.TabIndex = 21;
-            this.label_balance.Text = "0.00";
+            this.button_selectDZHPath.Location = new System.Drawing.Point(889, 131);
+            this.button_selectDZHPath.Name = "button_selectDZHPath";
+            this.button_selectDZHPath.Size = new System.Drawing.Size(78, 27);
+            this.button_selectDZHPath.TabIndex = 21;
+            this.button_selectDZHPath.Text = "浏览…";
+            this.button_selectDZHPath.UseVisualStyleBackColor = true;
+            this.button_selectDZHPath.Click += new System.EventHandler(this.button_selectDZHPath_Click);
             // 
-            // label_available
+            // textBox_dzhPath
             // 
-            this.label_available.ForeColor = System.Drawing.Color.Red;
-            this.label_available.Location = new System.Drawing.Point(202, 17);
-            this.label_available.Name = "label_available";
-            this.label_available.Size = new System.Drawing.Size(100, 15);
-            this.label_available.TabIndex = 23;
-            this.label_available.Text = "0.00";
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(159, 17);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(37, 15);
-            this.label9.TabIndex = 22;
-            this.label9.Text = "可用";
-            // 
-            // button_getBalance
-            // 
-            this.button_getBalance.Location = new System.Drawing.Point(969, 7);
-            this.button_getBalance.Name = "button_getBalance";
-            this.button_getBalance.Size = new System.Drawing.Size(75, 23);
-            this.button_getBalance.TabIndex = 24;
-            this.button_getBalance.Text = "刷新持仓";
-            this.button_getBalance.UseVisualStyleBackColor = true;
-            this.button_getBalance.Click += new System.EventHandler(this.button_getBalance_Click);
+            this.textBox_dzhPath.Enabled = false;
+            this.textBox_dzhPath.Location = new System.Drawing.Point(621, 133);
+            this.textBox_dzhPath.Multiline = true;
+            this.textBox_dzhPath.Name = "textBox_dzhPath";
+            this.textBox_dzhPath.Size = new System.Drawing.Size(262, 25);
+            this.textBox_dzhPath.TabIndex = 20;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1083, 468);
+            this.Controls.Add(this.button_selectDZHPath);
+            this.Controls.Add(this.textBox_dzhPath);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(button_saveUser);
             this.Controls.Add(this.label6);
@@ -473,6 +503,8 @@
         private System.Windows.Forms.Label label_balance;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button button_getBalance;
+        private System.Windows.Forms.Button button_selectDZHPath;
+        private System.Windows.Forms.TextBox textBox_dzhPath;
     }
 }
 

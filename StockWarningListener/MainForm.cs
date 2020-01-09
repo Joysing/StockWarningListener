@@ -26,13 +26,18 @@ namespace StockWarningListener
 
 
         //System.Globalization.DateTimeFormatInfo dtFormat = new System.Globalization.DateTimeFormatInfo();
-        System.Timers.Timer timer = new System.Timers.Timer(100);//0.1秒执行一次
+        System.Timers.Timer CheckBuyTimer = new System.Timers.Timer(100);//0.1秒执行一次
+        System.Timers.Timer CheckClientTimer = new System.Timers.Timer(10000);//10秒检测一次
         int SendCount = 0;//已发送的行数
         int SendType = 0;//发送文字还是文件
         string FilePath = @"D:\\dzh365\\WarningTxt";
         string YHClientPath;
         string QQWindowName = "";
         IntPtr QQWindowHandle;//QQ窗口句柄
+        string username = "";
+        string password = "";
+        string dzhPath = "";
+
         public MainForm()
         {
             InitializeComponent();
@@ -51,28 +56,57 @@ namespace StockWarningListener
             uint KLF_ACTIVATE = 1;
             PostMessage(0xffff, 0x00500, IntPtr.Zero, LoadKeyboardLayout(en_US, KLF_ACTIVATE));//屏蔽中文输入法
 
-            timer.Elapsed += delegate
+            CheckBuyTimer.Elapsed += delegate
             {
-                Thread thread1 = new Thread(Timer_TimesUp);
-                thread1.SetApartmentState(ApartmentState.STA);//要在线程里使用剪切板，必须设为STA模式
+                Thread thread = new Thread(CheckBuy);
+                thread.SetApartmentState(ApartmentState.STA);//要在线程里使用剪切板，必须设为STA模式
+                thread.Start();
+            };
+            CheckBuyTimer.AutoReset = true; //每到指定时间Elapsed事件是触发一次（false），还是一直触发（true）
+
+            CheckClientTimer.Elapsed += delegate
+            {
+                Thread thread1 = new Thread(CheckClient);
+                thread1.SetApartmentState(ApartmentState.STA);
                 thread1.Start();
             };
-            timer.AutoReset = true; //每到指定时间Elapsed事件是触发一次（false），还是一直触发（true）
+            CheckClientTimer.AutoReset = true; //每到指定时间Elapsed事件是触发一次（false），还是一直触发（true）
+            CheckClientTimer.Start();
             //YH_Client.Buy("600356",0,100);
             //Console.WriteLine(YH_Client.GetBalance());
             DataSet data = DBHelperSQLite.Query("select * from t_user WHERE clientType='YH'");
             if (data.Tables[0].Rows.Count > 0)
             {
-                string username= Convert.ToString(data.Tables[0].Rows[0]["Username"]);
-                string password= Convert.ToString(data.Tables[0].Rows[0]["Password"]);
+                username= Convert.ToString(data.Tables[0].Rows[0]["Username"]);
+                password= Convert.ToString(data.Tables[0].Rows[0]["Password"]);
                 textBox_YHUserName.Text = username;
                 textBox_YHPassword.Text = password;
                 YH_Client.AutoLogin(username, password);
             }
-            
+            DataSet sysData = DBHelperSQLite.Query("select * from t_sysconfig");
+            if (sysData.Tables[0].Rows.Count > 0)
+            {
+                foreach(DataRow dataRow in sysData.Tables[0].Rows)
+                {
+                    switch(Convert.ToString(dataRow["configName"]))
+                    {
+                        case "dzhPath":
+                            dzhPath = Convert.ToString(dataRow["configValue"]);
+                            textBox_dzhPath.Text = dzhPath;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            YH_Client.GetBalance(dataGridView_warehouse);
         }
 
+        private void button_TestSendMsg_Click(object sender, EventArgs e)
+        {
+            
 
+        }
 
 
 
@@ -137,60 +171,73 @@ namespace StockWarningListener
             }
         }
 
-        private void button_TestSendMsg_Click(object sender, EventArgs e)
-        {
-            if ("".Equals(QQWindowName))
-            {
-                MessageBox.Show("先选择QQ窗口");
-                return;
-            }
-            Clipboard.SetText("测试消息");
-            SendMessageByClipboard();
-            if (checkBox_CallPhone.Checked)
-            {
-                CallQQPhone();
-            }
-            
-        }
+        
 
         private void Button_Start_Click(object sender, EventArgs e)
         {
             switch (button_Start.Text)
             {
                 case "开始检测":
-                    if ("".Equals(QQWindowName))
+                    if(!YH_Client.AutoLogin(username, password))
                     {
-                        MessageBox.Show("先选择QQ窗口");
                         return;
                     }
-                    timer.Start();
+                    if ("".Equals(dzhPath))
+                    {
+                        MessageBox.Show("请先选择大智慧安装目录！");
+                        return;
+                    }
+                    CheckBuyTimer.Start();
                     button_Start.Text = "停止检测";
                     break;
                 case "停止检测":
-                    timer.Stop();
+                    CheckBuyTimer.Stop();
                     button_Start.Text = "开始检测";
                     break;
             }
             
         }
-
-        private void Timer_TimesUp()
+        private void CheckClient()
         {
-            if(DateTime.Now.Hour==0&& DateTime.Now.Minute == 0)//0点时更新发送的行数
-            {
-                SendCount = 0;
-            }
+            YH_Client.AutoLogin(username, password);
+        }
+        private void CheckBuy()
+        {
             try
             {
-                StreamReader sr = new StreamReader(FilePath+@"\\"+ DateTime.Now.Year+ DateTime.Now.Month+ DateTime.Now.Day+ ".txt", Encoding.Default);
+                StreamReader sr = new StreamReader(dzhPath + @"\WarningTxt\" + DateTime.Now.Year+ DateTime.Now.Month.ToString("00") + DateTime.Now.Day.ToString("00") + ".txt", Encoding.Default);
                 string line;
                 StringBuilder allLine = new StringBuilder();
                 int lineCount = 0;
                 while ((line = sr.ReadLine()) != null)
                 {
+                    string[] lineArray = line.Split('\t');
+                    bool isBuy = true;
+                    if (lineArray.Length > 0)
+                    {
+                        foreach (DataGridViewRow row in dataGridView_warehouse.Rows)
+                        {
+                            //当天不能重复买入同一个股票
+                            if (lineArray[0].Equals(row.Cells[0].Value)&& Convert.ToInt32(row.Cells[2].Value) > Convert.ToInt32(row.Cells[3].Value))
+                            {
+                                isBuy = false;
+                                break;
+                            }
+                        }
+                        if (isBuy)
+                        {
+                            YH_Client.Buy(lineArray[0], Convert.ToDouble(lineArray[3]), 100);
+                            
+                        }
+                    }
+                    else
+                    {
+                        return;
+                    }
+                    
                     lineCount++;
                     allLine.Append(line + "\n");
-                    //todo 买入，写dat文件保存已买入的股票
+                    //todo 买入，写dat文件保存已买入的股票600519	股票名称	2019-12-24 13:56	1148.03	-0.11%	8283	BUY
                 }
                 sr.Close();
                 if (lineCount > SendCount)//有新数据时
@@ -342,6 +389,7 @@ namespace StockWarningListener
         private void Button_selectFilePath_Click(object sender, EventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog();
+    
             dialog.Multiselect = false;//该值确定是否可以选择多个文件
             dialog.Title = "请选择文件";
             dialog.Filter = "TXT文件|*.txt;*.txt";
@@ -402,17 +450,35 @@ namespace StockWarningListener
 
         private void button_getBalance_Click(object sender, EventArgs e)
         {
-            
-            dataGridView_warehouse.Rows.Clear();
-            int index = dataGridView_warehouse.Rows.Add();
-            dataGridView_warehouse.Rows[index].Cells[0].Value = "600366";
-            dataGridView_warehouse.Rows[index].Cells[1].Value = "不不不";
-            dataGridView_warehouse.Rows[index].Cells[2].Value = 1000;
-            dataGridView_warehouse.Rows[index].Cells[3].Value = 1000;
-            dataGridView_warehouse.Rows[index].Cells[4].Value = 2.55;
-            dataGridView_warehouse.Rows[index].Cells[5].Value = 2550;
-            dataGridView_warehouse.Rows[index].Cells[6].Value = 2.55;
+            YH_Client.GetBalance(dataGridView_warehouse);
+        }
 
+        public void dataGridViewAddNewRow(string stockCode,string stockName,int qty,int availabelQty,double newPrice,double marketValue,double costPrice)
+        {
+            int index = dataGridView_warehouse.Rows.Add();
+            dataGridView_warehouse.Rows[index].Cells[0].Value = stockCode;
+            dataGridView_warehouse.Rows[index].Cells[1].Value = stockName;
+            dataGridView_warehouse.Rows[index].Cells[2].Value = qty;
+            dataGridView_warehouse.Rows[index].Cells[3].Value = availabelQty;
+            dataGridView_warehouse.Rows[index].Cells[4].Value = newPrice;
+            dataGridView_warehouse.Rows[index].Cells[5].Value = marketValue;
+            dataGridView_warehouse.Rows[index].Cells[6].Value = costPrice;
+        }
+
+        private void button_selectDZHPath_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog dialog = new FolderBrowserDialog();
+            dialog.Description = "请选择大智慧安装目录";
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                if (string.IsNullOrEmpty(dialog.SelectedPath))
+                {
+                    return;
+                }
+                textBox_dzhPath.Text = dialog.SelectedPath;
+                dzhPath = dialog.SelectedPath;
+                DBHelperSQLite.ExecuteSql("update t_sysConfig set configValue='" + dzhPath + "' WHERE configName='dzhPath'");
+            }
         }
     }
 }
