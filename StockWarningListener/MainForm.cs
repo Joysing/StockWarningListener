@@ -215,8 +215,15 @@ namespace StockWarningListener
                     bool isBuy = true;
                     if (lineArray.Length > 0)
                     {
+                        //300782	股票名称	2019-12-24 13:57	421.22	0.52%	6345	BUY
                         foreach (DataGridViewRow row in dataGridView_warehouse.Rows)
                         {
+                            //预警时间在10分钟之前的股票不再买入
+                            if (DateTime.Parse(lineArray[2]).AddMinutes(10) < DateTime.Now)
+                            {
+                                isBuy = false;
+                                break;
+                            }
                             //当天不能重复买入同一个股票
                             if (lineArray[0].Equals(row.Cells[0].Value)&& Convert.ToInt32(row.Cells[2].Value) > Convert.ToInt32(row.Cells[3].Value))
                             {
