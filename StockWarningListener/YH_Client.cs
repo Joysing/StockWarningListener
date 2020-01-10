@@ -96,7 +96,7 @@ namespace StockWarningListener
                     {
                         string stockCode = Convert.ToString(rangStockCode.Value);
                         string stockName = Convert.ToString(((MSExcel.Range)worksheet.Cells[excelIndex, 2]).Value);
-                        string marketType = Convert.ToString(((MSExcel.Range)worksheet.Cells[excelIndex, 12]).Value);
+                        string marketType = Convert.ToString(((MSExcel.Range)worksheet.Cells[excelIndex, 13]).Value);
                         int currentQty = Convert.ToInt32(((MSExcel.Range)worksheet.Cells[excelIndex, 3]).Value);
                         int availableQty = Convert.ToInt32(((MSExcel.Range)worksheet.Cells[excelIndex, 4]).Value);
                         double marketValue = Convert.ToDouble(((MSExcel.Range)worksheet.Cells[excelIndex, 9]).Value);

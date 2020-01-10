@@ -285,10 +285,10 @@ namespace StockWarningListener
             {
                 string marketCode="";
                 switch(Convert.ToString(row.Cells[7].Value)){
-                    case "深A":
+                    case "深Ａ":
                         marketCode = "sz";
                         break;
-                    case "上A":
+                    case "上Ａ":
                         marketCode = "sh";
                         break;
                     default:
