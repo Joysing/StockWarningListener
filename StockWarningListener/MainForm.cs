@@ -8,6 +8,7 @@ using System.Threading;
 using System.Configuration;
 using TCMS.DBUtility;
 using System.Data;
+using System.Net;
 
 namespace StockWarningListener
 {
@@ -27,11 +28,11 @@ namespace StockWarningListener
 
         //System.Globalization.DateTimeFormatInfo dtFormat = new System.Globalization.DateTimeFormatInfo();
         System.Timers.Timer CheckBuyTimer = new System.Timers.Timer(100);//0.1秒执行一次
+        System.Timers.Timer CheckSellTimer = new System.Timers.Timer(500);//0.5秒执行一次
         System.Timers.Timer CheckClientTimer = new System.Timers.Timer(10000);//10秒检测一次
         int SendCount = 0;//已发送的行数
         int SendType = 0;//发送文字还是文件
         string FilePath = @"D:\\dzh365\\WarningTxt";
-        string YHClientPath;
         string QQWindowName = "";
         IntPtr QQWindowHandle;//QQ窗口句柄
         string username = "";
@@ -63,17 +64,23 @@ namespace StockWarningListener
                 thread.Start();
             };
             CheckBuyTimer.AutoReset = true; //每到指定时间Elapsed事件是触发一次（false），还是一直触发（true）
-
+            CheckSellTimer.Elapsed += delegate
+            {
+                Thread thread = new Thread(CheckSell);
+                thread.SetApartmentState(ApartmentState.STA);//要在线程里使用剪切板，必须设为STA模式
+                thread.Start();
+            };
+            CheckSellTimer.AutoReset = true; //每到指定时间Elapsed事件是触发一次（false），还是一直触发（true）
+            CheckSellTimer.Start();
             CheckClientTimer.Elapsed += delegate
             {
                 Thread thread1 = new Thread(CheckClient);
-                thread1.SetApartmentState(ApartmentState.STA);
+                //thread1.SetApartmentState(ApartmentState.STA);
                 thread1.Start();
             };
             CheckClientTimer.AutoReset = true; //每到指定时间Elapsed事件是触发一次（false），还是一直触发（true）
             CheckClientTimer.Start();
-            //YH_Client.Buy("600356",0,100);
-            //Console.WriteLine(YH_Client.GetBalance());
+
             DataSet data = DBHelperSQLite.Query("select * from t_user WHERE clientType='YH'");
             if (data.Tables[0].Rows.Count > 0)
             {
@@ -81,7 +88,6 @@ namespace StockWarningListener
                 password= Convert.ToString(data.Tables[0].Rows[0]["Password"]);
                 textBox_YHUserName.Text = username;
                 textBox_YHPassword.Text = password;
-                YH_Client.AutoLogin(username, password);
             }
             DataSet sysData = DBHelperSQLite.Query("select * from t_sysconfig");
             if (sysData.Tables[0].Rows.Count > 0)
@@ -99,12 +105,14 @@ namespace StockWarningListener
                     }
                 }
             }
-            YH_Client.GetBalance(dataGridView_warehouse);
+            
+            //getStockNowPrice(new List<string>(){ "sh601006","sh601007"});
+            
         }
 
         private void button_TestSendMsg_Click(object sender, EventArgs e)
         {
-            
+            //getStockNowPrice(new List<string>(){ "sh601006","sh601007"});
 
         }
 
@@ -178,7 +186,7 @@ namespace StockWarningListener
             switch (button_Start.Text)
             {
                 case "开始检测":
-                    if(!YH_Client.AutoLogin(username, password))
+                    if(!YH_Client.AutoLogin(dataGridView_warehouse, username, password))
                     {
                         return;
                     }
@@ -199,7 +207,8 @@ namespace StockWarningListener
         }
         private void CheckClient()
         {
-            YH_Client.AutoLogin(username, password);
+            YH_Client.AutoLogin(dataGridView_warehouse, username, password);
+            
         }
         private void CheckBuy()
         {
@@ -267,6 +276,35 @@ namespace StockWarningListener
             
         }
 
+        private void CheckSell()
+        {
+            DataGridViewRowCollection dataRow = dataGridView_warehouse.Rows;
+            List<string> stockCode = new List<string>();
+            int index = 0;
+            foreach(DataGridViewRow row in dataRow)
+            {
+                string marketCode="";
+                switch(Convert.ToString(row.Cells[7].Value)){
+                    case "深A":
+                        marketCode = "sz";
+                        break;
+                    case "上A":
+                        marketCode = "sh";
+                        break;
+                    default:
+                        break;
+                }
+                if (marketCode.Length > 0)
+                {
+                    stockCode.Add(marketCode + Convert.ToString(row.Cells[0].Value));
+                }
+                
+            }
+            if (stockCode.Count > 0)
+            {
+                getStockNowPrice(stockCode);
+            }
+        }
         private void SendDataToQQ(string WarningData)
         {
 
@@ -487,5 +525,49 @@ namespace StockWarningListener
                 DBHelperSQLite.ExecuteSql("update t_sysConfig set configValue='" + dzhPath + "' WHERE configName='dzhPath'");
             }
         }
+		
+        /// <summary>
+        /// 通过API接口取股票最新价
+        /// </summary>
+        /// <returns></returns>
+		public List<double> getStockNowPrice(List<string> stockList){
+            //http ://hq.sinajs.cn/list=sh601006,sh601007,
+            string url = "http://hq.sinajs.cn/list=";
+            foreach (string stockCode in stockList)
+            {
+                url += stockCode + ",";
+            }
+
+			WebRequest myWebRequest = WebRequest.Create(url);
+            myWebRequest.ContentType = "text/html;charset=utf-8";
+            WebHeaderCollection Headers = new WebHeaderCollection();
+            WebResponse myWebResponse = myWebRequest.GetResponse();
+            Stream ReceiveStream = myWebResponse.GetResponseStream();
+
+            string responseStr = "";
+            List<double> resultPrice =new List<double>();
+            if (ReceiveStream != null)
+            {
+                StreamReader reader = new StreamReader(ReceiveStream, Encoding.UTF8);
+                responseStr = reader.ReadToEnd();
+                reader.Close();
+            }
+            string[] allStockLine = responseStr.Split('\n');
+            for (int i=0;i< allStockLine.Length;i++)
+            {
+                string line = allStockLine[i];
+                if (line.Length > 0)
+                {
+                    string marketCode = line.Substring(11, 2);
+                    string stockCode = line.Substring(13, 6);
+                    string lineValue = line.Substring(line.IndexOf('"') + 1, line.LastIndexOf('"') - line.IndexOf('"'));
+                    string stockName = lineValue.Split(',')[0];
+                    double newPrice = Convert.ToDouble(lineValue.Split(',')[3]);
+                    resultPrice.Add(newPrice);
+                }
+            }
+            myWebResponse.Close();
+            return resultPrice;
+		}
     }
 }

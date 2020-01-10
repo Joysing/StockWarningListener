@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using MSExcel = Microsoft.Office.Interop.Excel;
 using System.Windows.Forms;
+using log4net;
 
 namespace StockWarningListener
 {
@@ -18,6 +19,7 @@ namespace StockWarningListener
     /// </summary>
     public class YH_Client
     {
+        private static ILog log = LogManager.GetLogger("YH_Client");
         private static string YH_ClientPath=ConfigurationManager.AppSettings["YHClientPath"].ToString().Trim();
         List<string> excelColumn = new List<string>() { 
             "",
@@ -94,6 +96,7 @@ namespace StockWarningListener
                     {
                         string stockCode = Convert.ToString(rangStockCode.Value);
                         string stockName = Convert.ToString(((MSExcel.Range)worksheet.Cells[excelIndex, 2]).Value);
+                        string marketType = Convert.ToString(((MSExcel.Range)worksheet.Cells[excelIndex, 12]).Value);
                         int currentQty = Convert.ToInt32(((MSExcel.Range)worksheet.Cells[excelIndex, 3]).Value);
                         int availableQty = Convert.ToInt32(((MSExcel.Range)worksheet.Cells[excelIndex, 4]).Value);
                         double marketValue = Convert.ToDouble(((MSExcel.Range)worksheet.Cells[excelIndex, 9]).Value);
@@ -107,6 +110,7 @@ namespace StockWarningListener
                         dataGridView_warehouse.Rows[index].Cells[4].Value = 0;
                         dataGridView_warehouse.Rows[index].Cells[5].Value = marketValue;
                         dataGridView_warehouse.Rows[index].Cells[6].Value = costPrice;
+                        dataGridView_warehouse.Rows[index].Cells[7].Value = marketType;
 
                     }
                     else
@@ -227,11 +231,11 @@ namespace StockWarningListener
         /// <summary>
         /// 自动登录
         /// </summary>
-        public static bool AutoLogin(string username,string password)
+        public static bool AutoLogin(DataGridView dataGridView_warehouse,string username,string password)
         {
             if("".Equals(username)|| "".Equals(password))
             {
-                MessageBox.Show("银河账户或密码不能为空！");
+                log.Error("银河账户或密码不能为空！");
                 return false;
             }
             string ExeTitle = CheckAndOpenExe("xiadan");
@@ -244,12 +248,13 @@ namespace StockWarningListener
             {
                 OpenExe(YH_ClientPath);
             }
-                
+            
             IntPtr LoginWindowHandle = IntPtr.Zero;
             while ((int)LoginWindowHandle <= 0)
             {
                 LoginWindowHandle = WindowAPI.FindWindowEx(IntPtr.Zero, IntPtr.Zero, "#32770", "用户登录");
             }
+            Thread.Sleep(3000);
             IntPtr RatioButtonHandle = WindowAPI.FindWindowEx(LoginWindowHandle, IntPtr.Zero, "Button", "普通账户");
             IntPtr ComboBoxUserHandle = WindowAPI.FindWindowEx(LoginWindowHandle, IntPtr.Zero, "ComboBox", null);
             IntPtr EditUserHandle = WindowAPI.FindWindowEx(ComboBoxUserHandle, IntPtr.Zero, "Edit", null);
@@ -262,16 +267,24 @@ namespace StockWarningListener
             WindowAPI.SendMessage(RatioButtonHandle, WindowsMessage.WM_LBUTTONUP, 0, "");
             if (LoginWindowHandle.ToString() != "0")
             {
-                Bitmap validationCodeImage = WindowAPI.CaptureWindow(ImageVerifyCodeHandle, 13369376);
-                ImageAI imageAI = new ImageAI(validationCodeImage);
-                string codeResult = imageAI.GetVerifyCode();
-
+                //等待验证码
+                while ((int)ImageVerifyCodeHandle <= 0)
+                {
+                    Thread.Sleep(100);
+                    ImageVerifyCodeHandle = WindowAPI.FindWindowEx(LoginWindowHandle, IntPtr.Zero, "Static", null);
+                }
                 WindowAPI.SetForegroundWindow(LoginWindowHandle); //把窗体置于最前
-                WindowAPI.SendMessage(RatioButtonHandle, WindowsMessage.WM_LBUTTONDOWN, 0, "");
-                WindowAPI.SendMessage(RatioButtonHandle, WindowsMessage.WM_LBUTTONUP, 0, "");
+                WindowAPI.SendMessage(RatioButtonHandle, WindowsMessage.BM_CLICK, 0, "");
+                Thread.Sleep(50);
+                //WindowAPI.SendMessage(RatioButtonHandle, WindowsMessage.WM_LBUTTONUP, 0, "");
+                //Thread.Sleep(50);
                 WindowAPI.SendMessage(EditUserHandle, WindowsMessage.WM_SETTEXT, 0, username);
+                Thread.Sleep(50);
                 WindowAPI.SendMessage(EditPasswordHandle, WindowsMessage.WM_SETFOCUS, 0, "");
+                Thread.Sleep(50);
+                SendKeys.SendWait("{BACKSPACE 20}");
                 SendKeys.SendWait(password);
+                Thread.Sleep(50);
                 FillVerifyCode(EditVerifyCodeHandle, ImageVerifyCodeHandle, ButtonLoginHandle);
 
                 while (true)
@@ -299,6 +312,7 @@ namespace StockWarningListener
                     }
                 }
             }
+            GetBalance(dataGridView_warehouse);
             return true;
 
         }

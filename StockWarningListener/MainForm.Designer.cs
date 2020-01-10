@@ -55,6 +55,9 @@
             this.label_balance = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.dataGridView_warehouse = new System.Windows.Forms.DataGridView();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.button_selectDZHPath = new System.Windows.Forms.Button();
+            this.textBox_dzhPath = new System.Windows.Forms.TextBox();
             this.stockCode = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.stockName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.qty = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -62,9 +65,7 @@
             this.newPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.marketValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.cost = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.button_selectDZHPath = new System.Windows.Forms.Button();
-            this.textBox_dzhPath = new System.Windows.Forms.TextBox();
+            this.marketType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             button_YHClientPath = new System.Windows.Forms.Button();
             button_saveUser = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
@@ -335,7 +336,8 @@
             this.canSellQty,
             this.newPrice,
             this.marketValue,
-            this.cost});
+            this.cost,
+            this.marketType});
             this.dataGridView_warehouse.Location = new System.Drawing.Point(7, 35);
             this.dataGridView_warehouse.Name = "dataGridView_warehouse";
             this.dataGridView_warehouse.ReadOnly = true;
@@ -343,6 +345,35 @@
             this.dataGridView_warehouse.RowTemplate.Height = 27;
             this.dataGridView_warehouse.Size = new System.Drawing.Size(1038, 206);
             this.dataGridView_warehouse.TabIndex = 0;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Location = new System.Drawing.Point(4, 25);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(1051, 247);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // button_selectDZHPath
+            // 
+            this.button_selectDZHPath.Location = new System.Drawing.Point(889, 131);
+            this.button_selectDZHPath.Name = "button_selectDZHPath";
+            this.button_selectDZHPath.Size = new System.Drawing.Size(78, 27);
+            this.button_selectDZHPath.TabIndex = 21;
+            this.button_selectDZHPath.Text = "浏览…";
+            this.button_selectDZHPath.UseVisualStyleBackColor = true;
+            this.button_selectDZHPath.Click += new System.EventHandler(this.button_selectDZHPath_Click);
+            // 
+            // textBox_dzhPath
+            // 
+            this.textBox_dzhPath.Enabled = false;
+            this.textBox_dzhPath.Location = new System.Drawing.Point(621, 133);
+            this.textBox_dzhPath.Multiline = true;
+            this.textBox_dzhPath.Name = "textBox_dzhPath";
+            this.textBox_dzhPath.Size = new System.Drawing.Size(262, 25);
+            this.textBox_dzhPath.TabIndex = 20;
             // 
             // stockCode
             // 
@@ -400,34 +431,13 @@
             this.cost.ReadOnly = true;
             this.cost.Width = 125;
             // 
-            // tabPage2
+            // marketType
             // 
-            this.tabPage2.Location = new System.Drawing.Point(4, 25);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1051, 247);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // button_selectDZHPath
-            // 
-            this.button_selectDZHPath.Location = new System.Drawing.Point(889, 131);
-            this.button_selectDZHPath.Name = "button_selectDZHPath";
-            this.button_selectDZHPath.Size = new System.Drawing.Size(78, 27);
-            this.button_selectDZHPath.TabIndex = 21;
-            this.button_selectDZHPath.Text = "浏览…";
-            this.button_selectDZHPath.UseVisualStyleBackColor = true;
-            this.button_selectDZHPath.Click += new System.EventHandler(this.button_selectDZHPath_Click);
-            // 
-            // textBox_dzhPath
-            // 
-            this.textBox_dzhPath.Enabled = false;
-            this.textBox_dzhPath.Location = new System.Drawing.Point(621, 133);
-            this.textBox_dzhPath.Multiline = true;
-            this.textBox_dzhPath.Name = "textBox_dzhPath";
-            this.textBox_dzhPath.Size = new System.Drawing.Size(262, 25);
-            this.textBox_dzhPath.TabIndex = 20;
+            this.marketType.HeaderText = "市场类型";
+            this.marketType.MinimumWidth = 6;
+            this.marketType.Name = "marketType";
+            this.marketType.ReadOnly = true;
+            this.marketType.Width = 125;
             // 
             // MainForm
             // 
@@ -490,13 +500,6 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.DataGridView dataGridView_warehouse;
-        private System.Windows.Forms.DataGridViewTextBoxColumn stockCode;
-        private System.Windows.Forms.DataGridViewTextBoxColumn stockName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn qty;
-        private System.Windows.Forms.DataGridViewTextBoxColumn canSellQty;
-        private System.Windows.Forms.DataGridViewTextBoxColumn newPrice;
-        private System.Windows.Forms.DataGridViewTextBoxColumn marketValue;
-        private System.Windows.Forms.DataGridViewTextBoxColumn cost;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.Label label_available;
         private System.Windows.Forms.Label label9;
@@ -505,6 +508,14 @@
         private System.Windows.Forms.Button button_getBalance;
         private System.Windows.Forms.Button button_selectDZHPath;
         private System.Windows.Forms.TextBox textBox_dzhPath;
+        private System.Windows.Forms.DataGridViewTextBoxColumn stockCode;
+        private System.Windows.Forms.DataGridViewTextBoxColumn stockName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn qty;
+        private System.Windows.Forms.DataGridViewTextBoxColumn canSellQty;
+        private System.Windows.Forms.DataGridViewTextBoxColumn newPrice;
+        private System.Windows.Forms.DataGridViewTextBoxColumn marketValue;
+        private System.Windows.Forms.DataGridViewTextBoxColumn cost;
+        private System.Windows.Forms.DataGridViewTextBoxColumn marketType;
     }
 }
 
